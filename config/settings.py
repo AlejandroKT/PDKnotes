@@ -88,7 +88,7 @@ DATABASES = {
 }
 
 # Indicamos a Django que use nuestro modelo de usuario personalizado
-#AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 
 
