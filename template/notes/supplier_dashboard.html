@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold">Mis Notas</h2>
+    <a href="{% url 'note_create' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Agregar Nota</a>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200">
+        {% for note in notes %}
+        <li>
+            <a href="{% url 'note_detail' note.pk %}" class="block hover:bg-gray-50">
+                <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-indigo-600 truncate">{{ note.title }}</p>
+                        <div class="ml-2 flex-shrink-0 flex">
+                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Creado: {{ note.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </li>
+        {% empty %}
+        <li class="px-4 py-8 text-center text-gray-500">No hay notas. Presiona en "Agregar nota" para crear una.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

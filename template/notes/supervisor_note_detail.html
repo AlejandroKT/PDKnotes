@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Note Detail - {{ note.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <!-- Botón para volver a la lista de notas de este proveedor específico -->
+    <a href="{% url 'supervisor_supplier_notes' note.supplier.pk %}" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        {{ note.supplier.first_name }} Notas
+    </a>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg max-w-3xl mx-auto">
+    <!-- Encabezado de la nota -->
+    <div class="px-6 py-5 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold text-gray-900">{{ note.title }}</h3>
+
+        </div>
+        <!-- Información del proveedor al que pertenece la nota -->
+        <p class="mt-1 text-sm text-gray-500">
+            Proveedor: <span class="font-medium text-gray-700">{{ note.supplier.first_name }}</span> ({{ note.supplier.document_id }})
+        </p>
+    </div>
+
+    <!-- Cuerpo con los detalles -->
+    <div class="px-6 py-5">
+            <!-- Contenido de la nota -->
+            <div class="border-t border-gray-200 pt-4">
+                <dt class="text-sm font-medium text-gray-500 mb-2">Contenido</dt>
+                <dd class="text-sm text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-md p-4 border border-gray-100">
+                    {{ note.content }}
+                </dd>
+            </div>
+        </dl>
+    </div>
+</div>
+{% endblock %}

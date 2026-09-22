@@ -9,11 +9,11 @@
 <body class="bg-gray-100 text-gray-900">
     <nav class="bg-white shadow-sm mb-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-indigo-600">Supplier Notes System</h1>
+            <h1 class="text-xl font-bold text-indigo-600">PDKnotes</h1>
             {% if user.is_authenticated %}
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Welcome, {{ user.first_name }}</span>
-                    <a href="{% url 'logout' %}" class="text-sm text-red-600 hover:underline">Logout</a>
+                    <span class="text-sm text-gray-600">Bienvenido, {{ user.first_name }}</span>
+                    <a href="{% url 'logout' %}" class="text-sm text-red-600 hover:underline">Cerrar sesión</a>
                 </div>
             {% endif %}
         </div>

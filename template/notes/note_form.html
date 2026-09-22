@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Note{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+    <!-- Título dinámico basado en la acción -->
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">{% if action == 'Create' %}Crear{% else %}Editar{% endif %} Nota </h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Campo Title -->
+        <div class="mb-5">
+            <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                Titulo
+            </label>
+            {{ form.title }}
+            <!-- Mostrar errores de validación si existen -->
+            {% if form.title.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Campo Content -->
+        <div class="mb-6">
+            <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                Contenido
+            </label>
+            {{ form.content }}
+            <!-- Mostrar errores de validación si existen -->
+            {% if form.content.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.content.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+            <!-- Botón de Cancelar (Vuelve al dashboard) -->
+            <a href="{% url 'supplier_dashboard' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
+                Cancelar
+            </a>
+            
+            <!-- Botón de Enviar (Crear o Editar) -->
+            <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition shadow-sm">
+                {% if action == 'Create' %}Crear{% else %}Editar{% endif %} Nota
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

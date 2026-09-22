@@ -18,7 +18,7 @@ def register_view(request):
             user.is_supplier = True
             user.is_supervisor = False
             user.save()
-            messages.success(request, 'Registration successful. Please log in.')
+            messages.success(request, 'Registro exitoso. Porfavor ingrese.')
             return redirect('login')
     else:
         form = SupplierRegistrationForm()

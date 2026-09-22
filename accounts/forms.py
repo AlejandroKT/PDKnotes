@@ -3,11 +3,25 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
 
+# accounts/forms.py
+from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import User
+
 class SupplierRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('document_id', 'first_name', 'password1', 'password2')
 
+    def save(self, commit=True):
+
+        user = super().save(commit=False)
+
+        user.username = user.document_id
+        
+        if commit:
+            user.save()
+        return user
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.CharField(
