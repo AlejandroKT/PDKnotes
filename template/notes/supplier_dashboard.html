@@ -3,6 +3,9 @@
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-bold">Mis Notas</h2>
     <a href="{% url 'note_create' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Agregar Nota</a>
+    <a href="{% url 'supplier_profile' request.user.pk %}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+    Mi Perfil
+</a>
 </div>
 
 <div class="bg-white shadow overflow-hidden sm:rounded-md">

@@ -3,14 +3,33 @@
 {% block title %}Register Supplier{% endblock %}
 {% block content %}
 <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-    <h2 class="text-2xl font-bold mb-6 text-center">Register Supplier</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center">Crear cuenta</h2>
     <form method="post">
         {% csrf_token %}
         
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- CAMPOS DE CÉDULA / RIF UNIDOS -->
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Cédula / RIF</label>
-            {{ form.document_id }}
-            {% if form.document_id.errors %}<p class="text-red-500 text-sm mt-1">{{ form.document_id.errors.0 }}</p>{% endif %}
+            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula / RIF</label>
+            <div class="flex space-x-2">
+                <!-- Selector de Tipo (V / J) -->
+                <div class="w-1/6">
+                    {{ form.document_type }}
+                    {% if form.document_type.errors %}<p class="text-red-500 text-xs mt-1">{{ form.document_type.errors.0 }}</p>{% endif %}
+                </div>
+                <!-- Input del Número -->
+                <div class="w-5/6">
+                    {{ form.document_number }}
+                    {% if form.document_number.errors %}<p class="text-red-500 text-xs mt-1">{{ form.document_number.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
         </div>
 
         <div class="mb-4">
@@ -49,7 +68,7 @@
             {% if form.password2.errors %}<p class="text-red-500 text-sm mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
         </div>
 
-        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Registrar</button>
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Registro</button>
     </form>
     <p class="mt-4 text-center text-sm">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="text-indigo-600 hover:underline">Ingresa aqui</a></p>
 </div>

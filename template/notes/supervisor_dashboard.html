@@ -1,22 +1,51 @@
-<!-- templates/notes/supervisor_dashboard.html -->
 {% extends 'base.html' %}
+{% load static %}
+{% block title %}Supervisor Dashboard{% endblock %}
+
 {% block content %}
-<h2 class="text-2xl font-bold mb-6">Proveedores Registrados</h2>
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Proveedores</h2>
+    
+    <!-- BARRA DE BÚSQUEDA CON AUTOCOMPLETADO -->
+    <div class="relative max-w-md">
+        <label for="supplier-search" class="block text-sm font-medium text-gray-700 mb-1">
+            Buscar Proveedor
+        </label>
+        <input 
+            type="text" 
+            id="supplier-search" 
+            placeholder="Escribe cédula, RIF o nombre..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            autocomplete="off"
+        >
+        
+        <!-- DROPDOWN DE RESULTADOS -->
+        <ul id="search-results" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
+            <!-- Los resultados se insertarán aquí dinámicamente -->
+        </ul>
+    </div>
+</div>
+
+<!-- LISTA COMPLETA DE PROVEEDORES (Tabla) -->
 <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
+    <ul class="divide-y divide-gray-200" id="suppliers-list">
         {% for supplier in suppliers %}
-        <li>
+        <li class="supplier-item" data-name="{{ supplier.first_name|lower }}" data-document="{{ supplier.document_id|lower }}">
             <a href="{% url 'supervisor_supplier_notes' supplier.pk %}" class="block hover:bg-gray-50">
                 <div class="px-4 py-4 sm:px-6">
                     <div class="flex items-center justify-between">
-                        <!-- Quitamos supplier.last_name -->
                         <p class="text-sm font-medium text-indigo-600 truncate">{{ supplier.first_name }}</p>
                         <p class="text-sm text-gray-500">ID: {{ supplier.document_id }}</p>
                     </div>
                 </div>
             </a>
         </li>
+        {% empty %}
+        <li class="px-4 py-8 text-center text-gray-500">No se han registrado proveedores todavia.</li>
         {% endfor %}
     </ul>
 </div>
+
+<script src="{% static 'js/search_bar.js' %}"></script>
+
 {% endblock %}

@@ -29,7 +29,6 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractUser):
     document_id = models.CharField(max_length=20, unique=True, verbose_name="Cédula / RIF")
     phone_number = models.CharField(max_length=20, verbose_name="Número de Teléfono")
-    # blank=True y null=True hacen que este campo sea opcional en la base de datos
     address = models.TextField(blank=True, null=True, verbose_name="Dirección (Opcional)")
     
     is_supplier = models.BooleanField(default=True, verbose_name="Es Proveedor")
