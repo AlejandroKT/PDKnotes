@@ -3,22 +3,25 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
 
-# accounts/forms.py
-from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import User
-
 class SupplierRegistrationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('document_id', 'first_name', 'password1', 'password2')
+        # Agregamos email, phone_number y address
+        fields = ('document_id', 'first_name', 'email', 'phone_number', 'address', 'password1', 'password2')
+        widgets = {
+            'address': forms.Textarea(attrs={
+                'rows': 2, 
+                'cols': 40,
+            }),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacemos que el campo dirección sea opcional en el formulario
+        self.fields['address'].required = False
 
     def save(self, commit=True):
-
         user = super().save(commit=False)
-
         user.username = user.document_id
-        
         if commit:
             user.save()
         return user

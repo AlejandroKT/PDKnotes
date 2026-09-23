@@ -1,34 +1,56 @@
 <!-- templates/accounts/register.html -->
 {% extends 'base.html' %}
-{% block title %}Register{% endblock %}
+{% block title %}Register Supplier{% endblock %}
 {% block content %}
 <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-    <h2 class="text-2xl font-bold mb-6 text-center">Registro de proveedores</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center">Register Supplier</h2>
     <form method="post">
         {% csrf_token %}
         
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Cédula / RIF</label>
             {{ form.document_id }}
+            {% if form.document_id.errors %}<p class="text-red-500 text-sm mt-1">{{ form.document_id.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Nombre</label>
             {{ form.first_name }}
+            {% if form.first_name.errors %}<p class="text-red-500 text-sm mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="text-red-500 text-sm mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Número de Teléfono</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<p class="text-red-500 text-sm mt-1">{{ form.phone_number.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700">Dirección (Opcional)</label>
+            {{ form.address }}
+            {% if form.address.errors %}<p class="text-red-500 text-sm mt-1">{{ form.address.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Contraseña</label>
             {{ form.password1 }}
+            {% if form.password1.errors %}<p class="text-red-500 text-sm mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
             {{ form.password2 }}
+            {% if form.password2.errors %}<p class="text-red-500 text-sm mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
         </div>
 
         <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Registrar</button>
     </form>
-    <p class="mt-4 text-center text-sm">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="text-indigo-600 hover:underline">Inciar sesión</a></p>
+    <p class="mt-4 text-center text-sm">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="text-indigo-600 hover:underline">Ingresa aqui</a></p>
 </div>
 {% endblock %}
