@@ -10,7 +10,8 @@ urlpatterns = [
     path('supplier/note/<int:pk>/delete/', views.note_delete, name='note_delete'),
 
     # Supervisor URLs
-    path('supervisor/dashboard/', views.supervisor_dashboard, name='supervisor_dashboard'),
+    path('supervisor/table/', views.supervisor_table, name='supervisor_table'),
+    path('supervisor/dashboard/',views.supervisor_dashboard, name='supervisor_dashboard'),
     path('supervisor/supplier/<int:supplier_id>/notes/', views.supervisor_supplier_notes, name='supervisor_supplier_notes'),
     path('supervisor/note/<int:pk>/', views.supervisor_note_detail, name='supervisor_note_detail'),
 ]

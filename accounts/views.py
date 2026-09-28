@@ -30,7 +30,7 @@ def register_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_supervisor:
-            return redirect('supervisor_dashboard')
+            return redirect('supervisor_table')
         return redirect('supplier_dashboard')
 
     if request.method == 'POST':

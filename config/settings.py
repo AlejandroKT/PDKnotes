@@ -26,6 +26,9 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
+# Email configuration - Para desarrollo (muestra emails en la consola)
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 allowed_hosts_str = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
 

@@ -3,6 +3,18 @@ from django.db import models
 from django.conf import settings
 
 class Note(models.Model):
+
+    CATEGORY_CHOICES = [
+        ('COMPRAS', 'Compras'),
+        ('ADMINISTRACION', 'Administración'),
+        ('INGENIERIA', 'Ingeniería'),
+        ('TOPOGRAFIA', 'Topografía'),
+        ('CONTROL_CALIDAD', 'Control de Calidad'),
+        ('LOGISTICA', 'Logística'),
+        ('RECURSOS_HUMANOS', 'Recursos Humanos'),
+        ('SEGURIDAD_HIGIENE', 'Seguridad e Higiene'),
+    ]
+     
     supplier = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
@@ -11,6 +23,13 @@ class Note(models.Model):
     )
     title = models.CharField(max_length=200)
     content = models.TextField()
+
+    category = models.CharField(
+        max_length=50, 
+        choices=CATEGORY_CHOICES, 
+        verbose_name="Categoría / Departamento",default='Sin categoría'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True) # Inmutable tras creación
     updated_at = models.DateTimeField(auto_now=True)     # Se actualiza al editar
 

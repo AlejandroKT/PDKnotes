@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from .models import Note
+from django.core.paginator import Paginator 
 from accounts.models import User
 from .forms import NoteForm
 
@@ -14,7 +15,6 @@ def supervisor_required(view_func):
     return user_passes_test(lambda u: u.is_supervisor, login_url='login')(view_func)
 
 # --- SUPPLIER VIEWS ---
-
 @login_required
 @supplier_required
 def supplier_dashboard(request):
@@ -30,7 +30,7 @@ def note_create(request):
             note = form.save(commit=False)
             note.supplier = request.user
             note.save()
-            messages.success(request, 'Note created successfully.')
+            messages.success(request, 'Nota creada con exito.')
             return redirect('supplier_dashboard')
     else:
         form = NoteForm()
@@ -87,3 +87,26 @@ def supervisor_note_detail(request, pk):
     # El supervisor puede ver cualquier nota, sin filtrar por supplier=request.user
     note = get_object_or_404(Note, pk=pk)
     return render(request, 'notes/supervisor_note_detail.html', {'note': note})
+
+def is_superuser(user):
+    return user.is_authenticated and user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser)
+def supervisor_table(request):
+     # 1. Obtenemos todas las notas ordenadas
+    notes = Note.objects.select_related('supplier').order_by('-created_at')
+    
+    # 2. Configuramos el paginador 
+    paginator = Paginator(notes, 15) 
+    page_number = request.GET.get('page')
+    
+    # 3. Obtenemos el objeto de página actual
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'notes/supervisor_table.html', {
+        'page_obj': page_obj, # Enviamos el objeto de página al template
+        'total_notes': notes.count(), # Para el badge de total en el header
+        'notes': notes,
+    })
+
