@@ -26,7 +26,11 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
+
 allowed_hosts_str = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+
 
 if allowed_hosts_str == '*':
     ALLOWED_HOSTS = ['*']
