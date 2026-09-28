@@ -92,7 +92,6 @@ def is_superuser(user):
     return user.is_authenticated and user.is_superuser
 
 @login_required
-@user_passes_test(is_superuser)
 def supervisor_table(request):
      # 1. Obtenemos todas las notas ordenadas
     notes = Note.objects.select_related('supplier').order_by('-created_at')
