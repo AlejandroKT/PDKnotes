@@ -107,15 +107,22 @@ def supervisor_table(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     
+    # VALIDACIÓN EN BACKEND: Verificar que fecha desde no sea mayor que fecha hasta
+    if date_from and date_to and date_from > date_to:
+        messages.error(request, 'La fecha "Desde" no puede ser superior a la fecha "Hasta"')
+        # No aplicamos los filtros de fecha si son inválidos
+        date_from = None
+        date_to = None
+    
     # Aplicar filtro por proveedor
     if supplier_filter:
         notes = notes.filter(supplier_id=supplier_filter)
     
-    # Aplicar filtro por fecha desde
+    # Aplicar filtro por fecha desde (solo si pasó la validación)
     if date_from:
         notes = notes.filter(created_at__date__gte=date_from)
     
-    # Aplicar filtro por fecha hasta
+    # Aplicar filtro por fecha hasta (solo si pasó la validación)
     if date_to:
         notes = notes.filter(created_at__date__lte=date_to)
     
@@ -129,13 +136,21 @@ def supervisor_table(request):
     # 5. Obtenemos el objeto de página actual
     page_obj = paginator.get_page(page_number)
     
+    # Si hubo error, no mostramos las fechas inválidas en el formulario
+    if date_from is None and date_to is None and request.GET.get('date_from') and request.GET.get('date_to'):
+        current_date_from = ''
+        current_date_to = ''
+    else:
+        current_date_from = date_from or ''
+        current_date_to = date_to or ''
+    
     return render(request, 'notes/supervisor_table.html', {
         'page_obj': page_obj,
         'total_notes': notes.count(),
         'suppliers': suppliers,
         'current_filters': {
             'supplier': supplier_filter or '',
-            'date_from': date_from or '',
-            'date_to': date_to or '',
+            'date_from': current_date_from,
+            'date_to': current_date_to,
         }
     })

@@ -4,7 +4,7 @@
 {% block content %}
 
 {% load static %}
-<div class="px-4 sm:px-6 lg:px-8">
+
     <!-- Header -->
     <div class="sm:flex sm:items-center sm:justify-between mb-6">
         <div class="sm:flex-auto">
@@ -25,7 +25,7 @@
 
     <!-- Filtros -->
     <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form id="filter-form" method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Filtro por Proveedor -->
             <div>
                 <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">
