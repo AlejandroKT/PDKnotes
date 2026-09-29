@@ -6,6 +6,12 @@ from .models import Note
 from django.core.paginator import Paginator 
 from accounts.models import User
 from .forms import NoteForm
+from django.db.models import Q
+from datetime import datetime
+
+#Modelo CustomUser para traer a los proveedores
+from accounts.models import User
+
 
 # Decoradores para verificar roles
 def supplier_required(view_func):
@@ -93,19 +99,43 @@ def is_superuser(user):
 
 @login_required
 def supervisor_table(request):
-     # 1. Obtenemos todas las notas ordenadas
+    # 1. Obtenemos todas las notas ordenadas
     notes = Note.objects.select_related('supplier').order_by('-created_at')
     
-    # 2. Configuramos el paginador 
-    paginator = Paginator(notes, 15) 
+    # 2. Procesar filtros
+    supplier_filter = request.GET.get('supplier')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    # Aplicar filtro por proveedor
+    if supplier_filter:
+        notes = notes.filter(supplier_id=supplier_filter)
+    
+    # Aplicar filtro por fecha desde
+    if date_from:
+        notes = notes.filter(created_at__date__gte=date_from)
+    
+    # Aplicar filtro por fecha hasta
+    if date_to:
+        notes = notes.filter(created_at__date__lte=date_to)
+    
+    # 3. Obtener proveedores únicos para el filtro
+    suppliers = User.objects.filter(is_supplier=True).order_by('first_name')
+    
+    # 4. Configuramos el paginador
+    paginator = Paginator(notes, 15)
     page_number = request.GET.get('page')
     
-    # 3. Obtenemos el objeto de página actual
+    # 5. Obtenemos el objeto de página actual
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'notes/supervisor_table.html', {
-        'page_obj': page_obj, # Enviamos el objeto de página al template
-        'total_notes': notes.count(), # Para el badge de total en el header
-        'notes': notes,
+        'page_obj': page_obj,
+        'total_notes': notes.count(),
+        'suppliers': suppliers,
+        'current_filters': {
+            'supplier': supplier_filter or '',
+            'date_from': date_from or '',
+            'date_to': date_to or '',
+        }
     })
-
