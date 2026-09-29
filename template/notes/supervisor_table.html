@@ -2,19 +2,19 @@
 {% block title %}Reporte General de Notas{% endblock %}
 
 {% block content %}
+{% load static %}
+
 <div class="px-4 sm:px-6 lg:px-8">
     <!-- Header: flex horizontal de lado a lado -->
     <div class="sm:flex sm:items-center sm:justify-between mb-6">
-        
         <!-- Elemento 1: Lado Izquierdo -->
         <div class="sm:flex-auto">
             <h1 class="text-3xl font-bold text-gray-900">Reporte General de Notas</h1>
             <p class="mt-2 text-sm text-gray-700">Listado completo de notas de todos los proveedores</p>
         </div>
-
+        
         <!-- Elemento 2: Lado Derecho (Agrupado en columna vertical) -->
         <div class="mt-4 sm:mt-0 flex flex-col items-end gap-4">
-
             <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
                 Total: {{ page_obj.paginator.count }} notas
             </span>
@@ -23,11 +23,8 @@
                     Proveedores
                 </a>
             </span>
-            
         </div>
-
     </div>
-</div>
 
     <!-- Tabla tipo Excel -->
     <div class="mt-8 flex flex-col">
@@ -43,64 +40,68 @@
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Fecha de Creación</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <!-- CAMBIO 2: Iteramos sobre page_obj en lugar de notes -->
-                            {% for note in page_obj %}
-                            <tr class="hover:bg-blue-50 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 border-r border-gray-100">
-                                    {{ note.supplier.first_name }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 border-r border-gray-100">
-                                    <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
-                                        {{ note.get_category_display }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-4 text-sm text-gray-700 border-r border-gray-100 max-w-md">
-                                    <div class="font-semibold text-gray-900 truncate" title="{{ note.title }}">{{ note.title }}</div>
-                                    <div class="text-gray-500 text-xs mt-1 line-clamp-2" title="{{ note.content }}">{{ note.content }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        {{ note.created_at|date:"d/m/Y" }}
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-12 text-gray-500">
-                                    <p class="mt-2">No hay notas registradas en el sistema.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
+                      <tbody class="divide-y divide-gray-200 bg-white">
+                {% for note in page_obj %}
+                <tr class="hover:bg-blue-50 transition-colors duration-150 cursor-pointer row-clickable"
+                    data-url="{% url 'supervisor_note_detail' pk=note.pk %}">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 border-r border-gray-100">
+                        <div class="flex items-center">
+                            {{ note.supplier.first_name }}
+                            <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 border-r border-gray-100">
+                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
+                            {{ note.get_category_display }}
+                        </span>
+                    </td>
+                    <td class="px-3 py-4 text-sm text-gray-700 border-r border-gray-100 max-w-md">
+                        <div class="font-semibold text-gray-900 truncate" title="{{ note.title }}">{{ note.title }}</div>
+                        <div class="text-gray-500 text-xs mt-1 line-clamp-2" title="{{ note.content }}">{{ note.content }}</div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div class="flex items-center">
+                            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ note.created_at|date:"d/m/Y" }}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-12 text-gray-500">
+                        <p class="mt-2">No hay notas registradas en el sistema.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
                     </table>
-                    
+
                     <!-- CAMBIO 3: Barra de Paginación con Tailwind CSS -->
                     {% if page_obj.paginator.num_pages > 1 %}
                     <nav class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6" aria-label="Pagination">
                         <div class="hidden sm:block">
                             <p class="text-sm text-gray-700">
-                                Mostrando 
-                                <span class="font-medium">{{ page_obj.start_index }}</span> 
-                                a 
-                                <span class="font-medium">{{ page_obj.end_index }}</span> 
-                                de 
-                                <span class="font-medium">{{ page_obj.paginator.count }}</span> 
+                                Mostrando
+                                <span class="font-medium">{{ page_obj.start_index }}</span>
+                                a
+                                <span class="font-medium">{{ page_obj.end_index }}</span>
+                                de
+                                <span class="font-medium">{{ page_obj.paginator.count }}</span>
                                 notas
                             </p>
                         </div>
-                        
                         <div class="flex flex-1 justify-between sm:justify-end gap-2 mt-3 sm:mt-0">
                             <!-- Botones Anteriores -->
                             {% if page_obj.has_previous %}
-                                <a href="?page=1" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">« Primera</a>
-                                <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">‹ Anterior</a>
+                            <a href="?page=1" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">« Primera</a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">‹ Anterior</a>
                             {% else %}
-                                <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">« Primera</span>
-                                <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">‹ Anterior</span>
+                            <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">« Primera</span>
+                            <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">‹ Anterior</span>
                             {% endif %}
 
                             <!-- Indicador de Página Actual -->
@@ -110,19 +111,21 @@
 
                             <!-- Botones Siguientes -->
                             {% if page_obj.has_next %}
-                                <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Siguiente ›</a>
-                                <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Última »</a>
+                            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Siguiente ›</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Última »</a>
                             {% else %}
-                                <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Siguiente ›</span>
-                                <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Última »</span>
+                            <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Siguiente ›</span>
+                            <span class="relative inline-flex items-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Última »</span>
                             {% endif %}
                         </div>
                     </nav>
                     {% endif %}
-                    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="{% static 'js/supervisor_table.js' %}"></script>
+
 {% endblock %}
