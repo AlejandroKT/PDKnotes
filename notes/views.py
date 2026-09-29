@@ -12,6 +12,11 @@ from datetime import datetime
 #Modelo CustomUser para traer a los proveedores
 from accounts.models import User
 
+#Librerias para exportar a excel
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from django.http import HttpResponse
+from openpyxl.utils import get_column_letter
 
 # Decoradores para verificar roles
 def supplier_required(view_func):
@@ -154,3 +159,99 @@ def supervisor_table(request):
             'date_to': current_date_to,
         }
     })
+
+
+#Funcion(Vista para exportar a Excel)
+
+@login_required
+@user_passes_test(is_superuser, login_url='login')
+def export_notes_excel(request):
+    # 1. Obtener todas las notas
+    notes = Note.objects.select_related('supplier').order_by('-created_at')
+    
+    # 2. Aplicar los mismos filtros que la tabla
+    supplier_filter = request.GET.get('supplier')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    if supplier_filter:
+        notes = notes.filter(supplier_id=supplier_filter)
+    if date_from:
+        notes = notes.filter(created_at__date__gte=date_from)
+    if date_to:
+        notes = notes.filter(created_at__date__lte=date_to)
+    
+    # 3. Crear el libro de Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Notas"
+    
+    # 4. Estilos
+    header_font = Font(name='Arial', bold=True, color='FFFFFF', size=11)
+    header_fill = PatternFill(start_color='2563EB', end_color='2563EB', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    cell_alignment = Alignment(vertical='center', wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # 5. Encabezados
+    headers = ['Proveedor', 'Cédula/RIF', 'Categoría', 'Título', 'Contenido', 'Fecha de Creación', 'Fecha de Modificación']
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # 6. Datos (Blindado contra errores de atributos)
+    for row_num, note in enumerate(notes, 2):
+        supplier = note.supplier
+        
+        # Obtener nombre de forma segura
+        supplier_name = str(getattr(supplier, 'first_name', '') or str(supplier))
+        
+        # Obtener Cédula/RIF
+        supplier_tax_id = str(supplier.document_id)        
+        # Obtener categoría de forma segura
+        if hasattr(note, 'get_category_display'):
+            category = str(note.get_category_display())
+        else:
+            category = str(getattr(note, 'category', 'N/A'))
+            
+        row_data = [
+            supplier_name,
+            supplier_tax_id,
+            category,
+            str(note.title) if note.title else '',
+            str(note.content) if note.content else '',
+            note.created_at.strftime('%d/%m/%Y %H:%M') if note.created_at else '',
+            note.updated_at.strftime('%d/%m/%Y %H:%M') if note.updated_at else '',
+        ]
+        
+        for col_num, value in enumerate(row_data, 1):
+            # Forzamos que el valor sea un string para que openpyxl no falle
+            safe_value = str(value) if value is not None else ''
+            cell = ws.cell(row=row_num, column=col_num, value=safe_value)
+            cell.alignment = cell_alignment
+            cell.border = thin_border
+    
+    # 7. Ajustar ancho de columnas
+    column_widths = [20, 18, 15, 30, 50, 20, 20]
+    for col_num, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(col_num)].width = width
+    
+    # 8. Congelar la primera fila
+    ws.freeze_panes = 'A2'
+    
+    # 9. Crear la respuesta HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="reporte_notas.xlsx"'
+    
+    wb.save(response)
+    return response
