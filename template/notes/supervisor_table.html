@@ -38,7 +38,7 @@
             </span>
             <div class="flex gap-2">
                 <!-- Botón Exportar Excel (solo supervisores) -->
-                {% if user.is_superuser %}
+                {% if user.is_supervisor %}
                 <a href="{% url 'export_notes_excel' %}{% if current_filters.supplier or current_filters.date_from or current_filters.date_to %}?{% endif %}{% if current_filters.supplier %}supplier={{ current_filters.supplier }}{% if current_filters.date_from or current_filters.date_to %}&{% endif %}{% endif %}{% if current_filters.date_from %}date_from={{ current_filters.date_from }}{% if current_filters.date_to %}&{% endif %}{% endif %}{% if current_filters.date_to %}date_to={{ current_filters.date_to }}{% endif %}"
                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 inline-flex items-center gap-2 transition duration-150">
                     Exportar Excel
