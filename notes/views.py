@@ -161,10 +161,12 @@ def supervisor_table(request):
     })
 
 
-#Funcion(Vista para exportar a Excel)
+def is_supervisor(user):
+    return user.is_authenticated and user.is_supervisor
 
+#Funcion(Vista para exportar a Excel)
 @login_required
-@user_passes_test(is_superuser, login_url='login')
+@user_passes_test(is_supervisor, login_url='login')
 def export_notes_excel(request):
     # 1. Obtener todas las notas
     notes = Note.objects.select_related('supplier').order_by('-created_at')
