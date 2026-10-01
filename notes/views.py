@@ -2,12 +2,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Note
+from .models import Note, NoteAttachment
 from django.core.paginator import Paginator 
 from accounts.models import User
 from .forms import NoteForm
 from django.db.models import Q
 from datetime import datetime
+
+#Para eliminar los archivos mediante JS
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 #Modelo CustomUser para traer a los proveedores
 from accounts.models import User
@@ -36,16 +40,23 @@ def supplier_dashboard(request):
 @supplier_required
 def note_create(request):
     if request.method == 'POST':
-        form = NoteForm(request.POST)
+        form = NoteForm(request.POST, request.FILES)
         if form.is_valid():
             note = form.save(commit=False)
             note.supplier = request.user
             note.save()
-            messages.success(request, 'Nota creada con exito.')
+            
+            # GUARDAR MÚLTIPLES ARCHIVOS
+            files = request.FILES.getlist('attachments')
+            for f in files:
+                NoteAttachment.objects.create(note=note, file=f)
+            
+            messages.success(request, 'Nota creada con éxito.')
             return redirect('supplier_dashboard')
     else:
         form = NoteForm()
     return render(request, 'notes/note_form.html', {'form': form, 'action': 'Create'})
+
 
 @login_required
 @supplier_required
@@ -53,19 +64,33 @@ def note_detail(request, pk):
     note = get_object_or_404(Note, pk=pk, supplier=request.user)
     return render(request, 'notes/note_detail.html', {'note': note})
 
+
 @login_required
 @supplier_required
 def note_edit(request, pk):
     note = get_object_or_404(Note, pk=pk, supplier=request.user)
+    
     if request.method == 'POST':
-        form = NoteForm(request.POST, instance=note)
+        form = NoteForm(request.POST, request.FILES, instance=note)
         if form.is_valid():
             form.save()
+            
+            # AGREGAR NUEVOS ARCHIVOS (sin borrar los existentes)
+            files = request.FILES.getlist('attachments')
+            for f in files:
+                NoteAttachment.objects.create(note=note, file=f)
+            
             messages.success(request, 'Nota actualizada correctamente.')
             return redirect('supplier_dashboard')
     else:
         form = NoteForm(instance=note)
-    return render(request, 'notes/note_form.html', {'form': form, 'action': 'Edit', 'note': note})
+    
+    return render(request, 'notes/note_form.html', {
+        'form': form, 
+        'action': 'Edit', 
+        'note': note
+    })
+
 
 @login_required
 @supplier_required
@@ -76,6 +101,25 @@ def note_delete(request, pk):
         messages.success(request, 'Note deleted successfully.')
         return redirect('supplier_dashboard')
     return render(request, 'notes/note_confirm_delete.html', {'note': note})
+
+@login_required
+@require_POST
+def delete_attachment(request, attachment_id):
+    try:
+        # Obtenemos el archivo adjunto
+        attachment = get_object_or_404(NoteAttachment, id=attachment_id)
+        
+        # Verificación de seguridad: Solo el dueño de la nota o un supervisor pueden eliminarlo
+        if request.user != attachment.note.supplier and not getattr(request.user, 'is_supervisor', False):
+            return JsonResponse({'success': False, 'error': 'No tienes permiso para eliminar este archivo.'}, status=403)
+        
+        # Eliminar el registro (Django borra automáticamente el archivo físico del disco)
+        attachment.delete()
+        
+        return JsonResponse({'success': True, 'message': 'Archivo eliminado correctamente.'})
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 # --- SUPERVISOR VIEWS ---
 

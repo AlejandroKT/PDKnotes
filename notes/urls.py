@@ -15,7 +15,10 @@ urlpatterns = [
     path('supervisor/supplier/<int:supplier_id>/notes/', views.supervisor_supplier_notes, name='supervisor_supplier_notes'),
     path('supervisor/note/<int:pk>/', views.supervisor_note_detail, name='supervisor_note_detail'),
 
+    #Eliminar archivos mediante fetch
+    path('attachment/eliminar/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
+
     # Exportar a Excel URL
     path('supervisor/table/export/', views.export_notes_excel, name='export_notes_excel'),
 
-]
+]    
