@@ -170,3 +170,5 @@ MAILERS = {
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'supplier_dashboard' # Redirección por defecto
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
