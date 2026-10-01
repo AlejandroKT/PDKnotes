@@ -106,20 +106,30 @@ def note_delete(request, pk):
 @require_POST
 def delete_attachment(request, attachment_id):
     try:
-        # Obtenemos el archivo adjunto
         attachment = get_object_or_404(NoteAttachment, id=attachment_id)
         
-        # Verificación de seguridad: Solo el dueño de la nota o un supervisor pueden eliminarlo
+        # Verificar permisos
         if request.user != attachment.note.supplier and not getattr(request.user, 'is_supervisor', False):
-            return JsonResponse({'success': False, 'error': 'No tienes permiso para eliminar este archivo.'}, status=403)
+            return JsonResponse({
+                'success': False, 
+                'error': 'No tienes permiso para eliminar este archivo.'
+            }, status=403)
         
-        # Eliminar el registro (Django borra automáticamente el archivo físico del disco)
+        # Eliminar (Django borra automáticamente el archivo físico)
         attachment.delete()
         
-        return JsonResponse({'success': True, 'message': 'Archivo eliminado correctamente.'})
+        return JsonResponse({
+            'success': True, 
+            'message': 'Archivo eliminado correctamente.'
+        })
     
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        import traceback
+        traceback.print_exc()  # Esto mostrará el error real en la terminal
+        return JsonResponse({
+            'success': False, 
+            'error': f'Error interno: {str(e)}'
+        }, status=500)
 
 # --- SUPERVISOR VIEWS ---
 

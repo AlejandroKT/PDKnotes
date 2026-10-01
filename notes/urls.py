@@ -17,7 +17,7 @@ urlpatterns = [
 
     #Eliminar archivos mediante fetch
     path('attachment/eliminar/<int:attachment_id>/', views.delete_attachment, name='delete_attachment'),
-
+    
     # Exportar a Excel URL
     path('supervisor/table/export/', views.export_notes_excel, name='export_notes_excel'),
 

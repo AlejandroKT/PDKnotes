@@ -1,4 +1,21 @@
+
 let archivoAEliminar = null;
+
+// Función para obtener el token CSRF desde las cookies de Django
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 function confirmarEliminarArchivo(id) {
     archivoAEliminar = id;
@@ -6,61 +23,72 @@ function confirmarEliminarArchivo(id) {
 }
 
 function eliminarArchivo(archivoId) {
-    // Obtenemos el token CSRF del meta tag (ver paso 5)
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const csrfToken = getCookie('csrftoken');
     
     if (!csrfToken) {
-        console.error('CSRF token no encontrado.');
-        alert('Error de seguridad: Token CSRF no encontrado en la página.');
+        alert('Error: Token CSRF no encontrado. Recarga la página e intenta de nuevo.');
         return;
     }
 
-    // Deshabilitar botón temporalmente para evitar doble clic
     const btnConfirmar = document.getElementById('btn-confirmar-eliminar-archivo');
+    const textoOriginal = btnConfirmar.innerHTML;
     btnConfirmar.disabled = true;
-    btnConfirmar.innerHTML = '<svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Eliminando...';
+    btnConfirmar.innerHTML = 'Eliminando...';
 
-    fetch(`/notes/attachment/eliminar/${archivoId}/`, { // Asegúrate que '/notes/' coincide con el prefijo de tu app
+    // URL CORREGIDA (sin /notes/ al inicio si tu urls.py principal no tiene prefijo)
+    fetch(`/attachment/eliminar/${archivoId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        credentials: 'same-origin'  // IMPORTANTE: envía las cookies de sesión
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Status:', response.status);
+        console.log('OK:', response.ok);
+        
+        // Intentar parsear como JSON, pero si falla, mostrar el texto
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Respuesta no es JSON:', text);
+                throw new Error('El servidor devolvió un error. Revisa la consola (F12).');
+            }
+        });
+    })
     .then(data => {
         if (data.success) {
-            location.reload(); // Recarga la página para actualizar la vista
+            location.reload();
         } else {
-            alert('Error al eliminar: ' + (data.error || 'Desconocido'));
+            alert('Error: ' + (data.error || 'No se pudo eliminar el archivo'));
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Error de conexión al intentar eliminar el archivo.');
+        console.error('Error completo:', error);
+        alert('Error al eliminar: ' + error.message);
     })
     .finally(() => {
-        // Restaurar el botón
         btnConfirmar.disabled = false;
-        btnConfirmar.innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Sí, Eliminar`;
+        btnConfirmar.innerHTML = textoOriginal;
         document.getElementById('modal-confirmacion-archivo').classList.add('hidden');
         archivoAEliminar = null;
     });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Botones "Eliminar"
+    // Botones "Eliminar"
     document.querySelectorAll('.btn-eliminar-archivo').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Evita conflictos con otros clicks
+            e.stopPropagation();
             const id = this.dataset.id;
             confirmarEliminarArchivo(id);
         });
     });
 
-    // 2. Botón "Cancelar" del modal
+    // Botón "Cancelar"
     const btnCancelar = document.getElementById('btn-cancelar-eliminar-archivo');
     if (btnCancelar) {
         btnCancelar.addEventListener('click', function() {
@@ -69,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 3. Botón "Confirmar Eliminar" del modal
+    // Botón "Confirmar"
     const btnConfirmar = document.getElementById('btn-confirmar-eliminar-archivo');
     if (btnConfirmar) {
         btnConfirmar.addEventListener('click', function() {
@@ -79,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4. Cerrar modal al hacer clic fuera de él (en el fondo oscuro)
+    // Cerrar modal al hacer clic fuera
     const modal = document.getElementById('modal-confirmacion-archivo');
     if (modal) {
         modal.addEventListener('click', function(e) {
